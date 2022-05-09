@@ -34,18 +34,16 @@ RUN apt-get -qq update \
 
 RUN pip3 install \
     peewee_migrate \
+    pydantic \
     zeroconf \
-    voluptuous\
-    Flask-Sockets \
-    gevent \
-    gevent-websocket
+    ws4py
 
-COPY nginx/nginx.conf /etc/nginx/nginx.conf
+COPY --from=nginx /usr/local/nginx/ /usr/local/nginx/
 
 # get model and labels
 COPY labelmap.txt /labelmap.txt
-RUN wget -q https://github.com/google-coral/test_data/raw/master/ssdlite_mobiledet_coco_qat_postprocess_edgetpu.tflite -O /edgetpu_model.tflite
-RUN wget -q https://github.com/google-coral/test_data/raw/master/ssdlite_mobiledet_coco_qat_postprocess.tflite -O /cpu_model.tflite
+RUN wget -q https://github.com/google-coral/test_data/raw/release-frogfish/ssdlite_mobiledet_coco_qat_postprocess_edgetpu.tflite -O /edgetpu_model.tflite
+RUN wget -q https://github.com/google-coral/test_data/raw/release-frogfish/ssdlite_mobiledet_coco_qat_postprocess.tflite -O /cpu_model.tflite
 
 WORKDIR /opt/frigate/
 ADD frigate frigate/
@@ -53,10 +51,7 @@ ADD migrations migrations/
 
 COPY --from=web /opt/frigate/build web/
 
-COPY run.sh /run.sh
-RUN chmod +x /run.sh
+COPY docker/rootfs/ /
 
 EXPOSE 5000
 EXPOSE 1935
-
-CMD ["/run.sh"]
