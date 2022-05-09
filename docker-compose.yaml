@@ -1,0 +1,32 @@
+version: "3.8"
+services:
+  frigate:
+    container_name: frigate
+    privileged: true # this may not be necessary for all setups
+    restart: unless-stopped
+    image: nulldevil/frigate
+    runtime: nvidia
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities:
+              - gpu
+    shm_size: '1000mb'
+    devices:
+      - /dev/apex_0:/dev/apex_0
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /opt/config/frigate/config.yml:/config/config.yml:ro
+      - /opt/config/frigate/media:/media/frigate
+      - type: tmpfs # Optional: 1GB of memory, reduces SSD/SD Card wear
+        target: /tmp/cache
+        tmpfs:
+          size: 1000000000
+    ports:
+      - "5000:5000"
+      - "1935:1935" # RTMP feeds
+    environment:
+      - FRIGATE_RTSP_PASSWORD="********"
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,video,utility
