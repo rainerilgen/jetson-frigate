@@ -488,6 +488,11 @@ RUN \
           sed "s:${PREFIX}:/usr/local:g" <"$pc" >/usr/local/lib/pkgconfig/"${pc##*/}"; \
         done
 
+RUN mkdir /tmp/workdir/deps
+
+RUN ldd /usr/local/bin/ffmpeg | tr -s '[:blank:]' '\n' | grep '^/' | \
+    xargs -I % sh -c 'cp --verbose % /tmp/workdir/deps/$(basename %); echo $(basename %)'
+
 FROM        base AS release
 
 ENV         LD_LIBRARY_PATH=/usr/local/lib:/usr/local/lib64:/usr/lib:/usr/lib64:/lib:/lib64
@@ -496,5 +501,6 @@ CMD         ["--help"]
 ENTRYPOINT  ["ffmpeg"]
 
 COPY --from=build /usr/local /usr/local/
+COPY --from=build /tmp/workdir/deps/* /usr/local/lib/aarch64-linux-gnu/
 
 # Run ffmpeg with -c:v h264_nvmpi to enable HW accell for decoding on Jetson Nano
