@@ -41,7 +41,7 @@ cd frigate
 
 ```
 git clone https://github.com/rainerilgen/jetson-frigate.git
-rm -rf docker Makefile
+
 mv jetson-frigate/docker/Dockerfile.base docker/
 mv jetson-frigate/docker/Dockerfile.ffmpeg.aarch64 docker/
 mv jetson-frigate/docker/Dockerfile.ffmpeg.aarch64-jetson docker/
